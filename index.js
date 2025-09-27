@@ -1,0 +1,33 @@
+import express from "express";
+import cors from 'cors';
+import sneakersRoutes from './Routes/Sneakers.js'
+import linksRoutes from './Routes/Links.js'
+import filterSneakers from './Routes/Filter.js'
+import authRoutes from './Routes/Auth.js'
+import discountsRoutes from './Routes/Discounts.js'
+import otpRoutes from './Routes/Otp.js'
+import { authenticateToken } from "./middlewares/middleware.js";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json()); 
+
+
+app.use('/auth', authRoutes )
+
+
+app.use('/sneakers',authenticateToken, sneakersRoutes);
+app.use('/links',authenticateToken,  linksRoutes);
+app.use('/discounts',authenticateToken,  discountsRoutes)
+app.use('/filter',authenticateToken,  filterSneakers);
+app.use('/otp',authenticateToken,  otpRoutes)
+
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
