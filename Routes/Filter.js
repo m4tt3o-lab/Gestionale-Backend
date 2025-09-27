@@ -1,5 +1,5 @@
 import express from 'express';
-import { searchSneakers } from '../Controllers/filter.js';
+import { searchSneakers } from '../Controllers/Filter.js';
 
 const router = express.Router();
 
