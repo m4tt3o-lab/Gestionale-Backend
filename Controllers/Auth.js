@@ -1,8 +1,10 @@
 import User from "../Models/Auth.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv';
 
-const JWT_SECRET = 'efrtghthyhtg5yh54y56676878ii'
+dotenv.config();
+
 
 
 export const login = async (req, res)=> {
@@ -15,7 +17,7 @@ export const login = async (req, res)=> {
             {
                 id: user.id,
                 username: user.username
-            }, JWT_SECRET, { expiresIn: "3h" } 
+            }, process.env.JWT_SECRET, { expiresIn: "3h" } 
         );
             return res.json({status: 'ok', data:token })
     }
