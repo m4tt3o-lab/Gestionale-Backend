@@ -11,11 +11,11 @@ dotenv.config();
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: path.join(__dirname, 'sneakerstracker.sqlite'), // questo file verrà creato
-  logging: false // opzionale, per non vedere query in console
+  logging: true // opzionale, per non vedere query in console
 });
 
 sequelize.authenticate()
-  .then(() => console.log('Connesso al database MySQL'))
+  .then(() => console.log('Connesso al database sqlite'))
   .catch(err => console.error('Impossibile connettersi:', err));
 
 export default sequelize;
