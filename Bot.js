@@ -1,91 +1,135 @@
-import express from "express";
-import dotenv from "dotenv";
 import { Client, GatewayIntentBits } from "discord.js";
-import Link from './Models/Links.js';
+import dotenv from "dotenv";
+import Link from './Models/Links.js'; // IMPORTANTE: usa il path corretto
 
 dotenv.config();
-const app = express();
-app.use(express.json());
 
-let client = null; // mantiene il bot attuale
-let isBotRunning = false;
+let client = null;
+let isRunning = false;
 
-// === AVVIA IL BOT ===
-export const startBot = () => {
-  if (isBotRunning) {
+// Funzione per verificare se il bot è in esecuzione
+export function isBotRunning() {
+  return isRunning && client !== null && client.isReady();
+}
+
+// Funzione per avviare il bot
+export const startBot = async () => {
+  if (isRunning) {
     console.log("⚠️ Il bot è già attivo.");
     return;
   }
 
-  client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-    ],
-  });
+  try {
+    console.log("🤖 Avvio del bot Discord...");
 
-  client.once("ready", () => {
-    console.log(`✅ Bot connesso come ${client.user.tag}`);
-    isBotRunning = true;
-  });
+    client = new Client({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+      ],
+    });
 
+    client.once("ready", () => {
+      console.log(`✅ Bot connesso come ${client.user.tag}`);
+      isRunning = true;
+    });
 
+    // Gestione messaggi con embed
+    client.on("messageCreate", async (message) => {
+      if (message.embeds.length > 0) {
+        console.log("📩 Embed trovato!");
+        
+        for (const embed of message.embeds) {
+          const fields = embed.fields || [];
 
-  client.on("messageCreate", async (message) => {
-    if (message.embeds.length > 0) {
-      console.log("Embed trovato!");
-      for (const embed of message.embeds) {
-        const fields = embed.fields || [];
-
-        for (const field of fields) {
-          const match = field.value.match(/\[Click here\]\((https:\/\/discord\.com\/channels\/\d+\/\d+\/\d+)\)/);
-          if (match) {
-            const link = match[1];
-            console.log(`🔗 Link estratto: ${link}`);
-            try {
-              const newLink = await Link.create({ Url: link });
-              console.log("✅ Link salvato:", newLink.Url);
-            } catch (error) {
-              console.error("❌ Errore salvataggio link:", error.message);
+          for (const field of fields) {
+            // Regex per estrarre link Discord
+            const match = field.value.match(/\[Click here\]\((https:\/\/discord\.com\/channels\/\d+\/\d+\/\d+)\)/);
+            
+            if (match) {
+              const link = match[1];
+              console.log(`🔗 Link estratto: ${link}`);
+              
+              try {
+                await Link.create({ Url: link });
+                console.log("✅ Link salvato nel database");
+              } catch (error) {
+                if (error.name === 'SequelizeUniqueConstraintError') {
+                  console.log("⚠️  Link già esistente, saltato");
+                } else {
+                  console.error("❌ Errore salvataggio link:", error.message);
+                }
+              }
             }
           }
         }
       }
-    }
-  });
+    });
 
-  client.login(process.env.TOKEN).catch((err) => {
-    console.error("❌ Errore di login:", err);
-    isBotRunning = false;
-  });
+    // Gestione errori
+    client.on("error", (error) => {
+      console.error("❌ Errore Discord bot:", error);
+    });
+
+    client.on("disconnect", () => {
+      console.log("⚠️  Bot disconnesso");
+      isRunning = false;
+    });
+
+    // Login
+    const token =  process.env.TOKEN;
+    
+    if (!token) {
+      throw new Error("DISCORD_BOT_TOKEN o TOKEN non configurato nel file .env");
+    }
+
+    await client.login(token);
+
+  } catch (error) {
+    console.error("❌ Errore durante l'avvio del bot:", error);
+    isRunning = false;
+    client = null;
+    throw error;
+  }
 };
 
-  app.get('/bot-status', (req, res) => {
-  try {
-    // Verifica se il bot è pronto
-    const botStatus = client.isReady(); 
-    // Restituisce direttamente lo stato del bot come oggetto
-    res.json({ botStatus });  
-  } catch (error) {
-    console.error("Errore nel recuperare lo stato del bot:", error);
-    res.json({ botStatus: false });
+// Funzione per fermare il bot
+export const stopBot = async () => {
+  if (!client || !isRunning) {
+    console.log("⚠️ Nessun bot attivo da fermare.");
+    return;
   }
+
+  try {
+    console.log("⛔ Arresto del bot Discord...");
+    
+    client.removeAllListeners();
+    await client.destroy();
+    
+    client = null;
+    isRunning = false;
+    
+    console.log("✅ Bot disconnesso");
+  } catch (error) {
+    console.error("❌ Errore durante l'arresto del bot:", error);
+    throw error;
+  }
+};
+
+// Cleanup quando il processo termina
+process.on("SIGINT", async () => {
+  console.log("\n⚠️  Ricevuto SIGINT, chiusura bot...");
+  if (isRunning) {
+    await stopBot();
+  }
+  process.exit(0);
 });
 
-// === FERMA IL BOT ===
-export const stopBot = async () => {
-  if (client && isBotRunning) {
-    await client.destroy();
-    console.log("🛑 Bot disconnesso.");
-    isBotRunning = false;
-    client = null;
-  } else {
-    console.log("⚠️ Nessun bot attivo da fermare.");
+process.on("SIGTERM", async () => {
+  console.log("\n⚠️  Ricevuto SIGTERM, chiusura bot...");
+  if (isRunning) {
+    await stopBot();
   }
-};
-
-
-app.listen(process.env.BOT_PORT, () => {
-  console.log(`🚀 ServerBot avviato sulla porta ${process.env.BOT_PORT}`);
+  process.exit(0);
 });
