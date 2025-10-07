@@ -28,6 +28,16 @@ app.use('/otp',authenticateToken,  otpRoutes)
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+(async () => {
+  try {
+
+    await sequelize.sync({ alter: true }); 
+    console.log("✅ Tabelle create o aggiornate correttamente.");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server in esecuzione sulla porta ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Errore durante la sincronizzazione del database:", err);
+  }
+})();
