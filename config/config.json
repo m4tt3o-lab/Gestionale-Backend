@@ -1,14 +1,14 @@
 {
   "development": {
-    "dialect": "sqlite",
-    "storage": "./sneakerstracker.sqlite"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
   },
   "test": {
-    "dialect": "sqlite",
-    "storage": ":memory:"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
   },
   "production": {
-    "dialect": "sqlite",
-    "storage": "./sneakerstracker.sqlite"
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
   }
 }
