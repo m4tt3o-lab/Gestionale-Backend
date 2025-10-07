@@ -1,5 +1,6 @@
 import express from "express";
 import cors from 'cors';
+import sequelize from "./db.js";
 import sneakersRoutes from './Routes/Sneakers.js'
 import linksRoutes from './Routes/Links.js'
 import filterSneakers from './Routes/Filter.js'
