@@ -1,9 +1,9 @@
 import express from "express";
 import cors from 'cors';
-import sequelize from "./db.js";
 import sneakersRoutes from './Routes/Sneakers.js'
 import linksRoutes from './Routes/Links.js'
 import filterSneakers from './Routes/Filter.js'
+import arduinoRoutes from './Routes/Arduino.js'
 import authRoutes from './Routes/Auth.js'
 import discountsRoutes from './Routes/Discounts.js'
 import otpRoutes from './Routes/Otp.js'
@@ -23,22 +23,14 @@ app.use('/auth', authRoutes )
 app.use('/sneakers',authenticateToken, sneakersRoutes);
 app.use('/links',authenticateToken,  linksRoutes);
 app.use('/discounts',authenticateToken,  discountsRoutes)
+app.use('/arduino',authenticateToken,  arduinoRoutes)
 app.use('/filter',authenticateToken,  filterSneakers);
 app.use('/otp',authenticateToken,  otpRoutes)
 
 
 const PORT = process.env.PORT || 3000;
 
-(async () => {
-  try {
 
-    await sequelize.sync({ alter: true }); 
-    console.log("✅ Tabelle create o aggiornate correttamente.");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server in esecuzione sulla porta ${PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ Errore durante la sincronizzazione del database:", err);
-  }
-})();
+app.listen(PORT, () => {
+  console.log(`🚀 Server in esecuzione sulla porta ${PORT}`);
+});
