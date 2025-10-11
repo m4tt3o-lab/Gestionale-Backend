@@ -2,7 +2,7 @@ import express from "express";
 import cors from 'cors';
 import sneakersRoutes from './Routes/Sneakers.js'
 import linksRoutes from './Routes/Links.js'
-import filterSneakers from './Routes/Filter.js'
+import filterSneakersRoute from './Routes/Filter.js'
 import arduinoRoutes from './Routes/Arduino.js'
 import authRoutes from './Routes/Auth.js'
 import discountsRoutes from './Routes/Discounts.js'
@@ -24,7 +24,7 @@ app.use('/sneakers',authenticateToken, sneakersRoutes);
 app.use('/links',authenticateToken,  linksRoutes);
 app.use('/discounts',authenticateToken,  discountsRoutes)
 app.use('/arduino',authenticateToken,  arduinoRoutes)
-app.use('/filter',authenticateToken,  filterSneakers);
+app.use('/filter',authenticateToken,  filterSneakersRoute);
 app.use('/otp',authenticateToken,  otpRoutes)
 
 

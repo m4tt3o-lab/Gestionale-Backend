@@ -37,7 +37,7 @@ export const getSneakersByModel = async (req, res) => {
     const whereClause = {};
 
     if (modello) {
-      whereClause.modello = { [Op.like]: `%${modello}%` }; 
+      whereClause.modello = { [Op.iLike]: `%${modello}%` }; 
     }
     const sneakers = await Sneaker.findAll({ where: whereClause });
     res.json(sneakers);
