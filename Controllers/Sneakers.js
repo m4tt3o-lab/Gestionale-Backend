@@ -35,6 +35,7 @@ export const getSneakersByModel = async (req, res) => {
     const { modello } = req.query;
 
     const whereClause = {};
+    
 
     if (modello) {
       whereClause.modello = { [Op.iLike]: `%${modello}%` }; 

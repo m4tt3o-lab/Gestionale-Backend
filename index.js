@@ -23,7 +23,7 @@ app.use('/auth', authRoutes )
 app.use('/sneakers',authenticateToken, sneakersRoutes);
 app.use('/links',authenticateToken,  linksRoutes);
 app.use('/discounts',authenticateToken,  discountsRoutes)
-app.use('/arduino',authenticateToken,  arduinoRoutes)
+app.use('/arduino',  arduinoRoutes)
 app.use('/filter',authenticateToken,  filterSneakersRoute);
 app.use('/otp',authenticateToken,  otpRoutes)
 
